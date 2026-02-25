@@ -3,3 +3,8 @@
 .env
 **/.env
 
+
+# Secrets
+.env
+**/.env
+
