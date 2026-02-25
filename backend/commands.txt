@@ -1,0 +1,38 @@
+# Antigravity Project Commands
+
+## Development & Running
+Backend (Server):
+- Run: python -m app.main
+
+Frontend (UI):
+- Run: npm run dev (from /frontend directory)
+
+## Environment Setup (Backend)
+1. Create Virtual Env: python -m venv venv
+2. Activate Env: .\venv\Scripts\activate
+3. Install Dependencies: pip install -r requirements.txt
+
+## Building
+Frontend (Production Build):
+- Command: npm run build (creates /dist folder)
+
+## Cleanup
+Root Folder (Full Cleanup):
+- Command: Get-ChildItem -Path . -Include node_modules,dist,venv,__pycache__,.pytest_cache -Recurse | Remove-Item -Recurse -Force
+
+Frontend:
+- Clean: Remove-Item -Recurse -Force dist, node_modules
+
+Backend:
+- Clean: Get-ChildItem -Path . -Include __pycache__,.pytest_cache -Recurse | Remove-Item -Recurse -Force
+- Full Reset: Remove-Item -Recurse -Force venv
+
+## MCP Servers (Build & Setup)
+Azure DevOps MCP:
+- Build: cd mcp_server/azure-devops-mcp; npm install; npm run build
+
+GitHub PAT MCP:
+- Setup: cd mcp_server/github_pat_mcp; python -m venv venv; .\venv\Scripts\activate; pip install -r requirements.txt
+
+SQL Server MCP:
+- Setup: cd mcp_server/sql_server; python -m venv venv; .\venv\Scripts\activate; pip install fastmcp pyodbc python-dotenv

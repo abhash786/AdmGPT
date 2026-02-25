@@ -1,0 +1,44 @@
+{
+    "filesystem": {
+        "command": "npx",
+        "args": [
+            "-y",
+            "@modelcontextprotocol/server-filesystem",
+            "d:/Projects/antigravity"
+        ]
+    },
+    "mssql": {
+        "command": "python",
+        "args": [
+            "../mcp_server/sql_server/mssql_mcp_server.py"
+        ],
+        "transport": "stdio",
+        "required_env": [
+            "DB_CONNECTION_STRING"
+        ]
+    },
+    "ado": {
+        "type": "stdio",
+        "command": "node",
+        "args": [
+            "../mcp_server/azure-devops-mcp/dist/index.js",
+            "Pathlock",
+            "--authentication",
+            "envvar"
+        ],
+        "required_env": [
+            "ADO_MCP_AUTH_TOKEN",
+            "ADO_PROJECT"
+        ]
+    },
+    "github": {
+        "type": "stdio",
+        "command": "../mcp_server/github_pat_mcp/.venv/Scripts/python",
+        "args": [
+            "../mcp_server/github_pat_mcp/server.py"
+        ],
+        "required_env": [
+            "GITHUB_PERSONAL_ACCESS_TOKEN"
+        ]
+    }
+}
