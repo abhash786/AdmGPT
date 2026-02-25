@@ -14,7 +14,7 @@ Frontend (UI):
 
 ## Building
 Frontend (Production Build):
-- Command: npm run build (creates /dist folder)
+- Command: npm install; npm run build (creates /dist folder)
 
 ## Cleanup
 Root Folder (Full Cleanup):

@@ -33,7 +33,7 @@
     },
     "github": {
         "type": "stdio",
-        "command": "../mcp_server/github_pat_mcp/.venv/Scripts/python",
+        "command": "python",
         "args": [
             "../mcp_server/github_pat_mcp/server.py"
         ],

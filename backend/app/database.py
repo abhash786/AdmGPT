@@ -20,7 +20,7 @@ def _get_master_connection_string(connection_string: str) -> str:
 
 def _ensure_database_exists():
     """Connect to 'master' and create the target database if it does not exist."""
-    conn_str = Config.DB_CONNECTION_STRING
+    conn_str = Config.APP_DB_CONNECTION_STRING
     db_name = _parse_db_name(conn_str)
     if not db_name:
         print("Warning: Could not parse DATABASE name from connection string. Skipping auto-create.")
@@ -51,9 +51,9 @@ def _ensure_database_exists():
 
 def get_db():
     """Get a new database connection using the configured connection string."""
-    print(f"[DEBUG] Getting DB connection: {Config.DB_CONNECTION_STRING}")
+    print(f"[DEBUG] Getting DB connection: {Config.APP_DB_CONNECTION_STRING}")
     try:
-        conn = pyodbc.connect(Config.DB_CONNECTION_STRING, timeout=10)
+        conn = pyodbc.connect(Config.APP_DB_CONNECTION_STRING, timeout=10)
         print("[DEBUG] DB connection successful.")
         return conn
     except Exception as e:

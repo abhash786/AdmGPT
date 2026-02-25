@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ConversationSummary } from '../types';
-import { MessageSquare, Plus, PanelLeftClose, PanelLeftOpen, LogOut, User, Settings, Trash2 } from 'lucide-react';
+import { MessageSquare, Plus, PanelLeftClose, PanelLeftOpen, LogOut, Settings, Trash2 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import clsx from 'clsx';
 

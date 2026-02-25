@@ -8,3 +8,22 @@
 .env
 **/.env
 
+
+# Node build artifacts
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+

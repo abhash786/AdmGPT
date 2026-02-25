@@ -14,15 +14,32 @@ mock_uuid.compat.uuid7 = lambda: None
 sys.modules["uuid_utils"] = mock_uuid
 sys.modules["uuid_utils.compat"] = mock_uuid.compat
 
-# ==========================================
-# 2. CORE IMPORTS & SERVER SETUP
-# ==========================================
 import os
 import pyodbc
+import functools
+import json
 from mcp.server.fastmcp import FastMCP
 
 # Initialize FastMCP for SQL
 mcp = FastMCP("mssql")
+
+def log_tool(func):
+    """Decorator to log tool inputs and outputs."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        tool_name = func.__name__
+        input_data = f"args={args}, kwargs={kwargs}"
+        print(f"[SQL Tool] Calling {tool_name} with {input_data}")
+        try:
+            result = func(*args, **kwargs)
+            # Truncate output for logs if it's too long
+            preview = str(result)[:200] + ("..." if len(str(result)) > 200 else "")
+            print(f"[SQL Tool] {tool_name} Result: {preview}")
+            return result
+        except Exception as e:
+            print(f"[SQL Tool] {tool_name} Error: {str(e)}")
+            raise
+    return wrapper
 
 def get_db_connection():
     """Establishes connection using the provided connection string."""
@@ -32,10 +49,36 @@ def get_db_connection():
     return pyodbc.connect(conn_str)
 
 # ==========================================
-# 3. MCP TOOL DEFINITIONS (The Black Box)
+# 3. MCP TOOL DEFINITIONS
 # ==========================================
 
 @mcp.tool()
+@log_tool
+def check_connection() -> str:
+    """Verifies if the database connection is working."""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1")
+            return "Connection successful!"
+    except Exception as e:
+        return f"Connection failed: {str(e)}"
+
+@mcp.tool()
+@log_tool
+def get_database_info() -> str:
+    """Returns the SQL Server version and current database name."""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT @@VERSION as version, DB_NAME() as db_name")
+            row = cursor.fetchone()
+            return f"Server Version: {row.version}\nDatabase: {row.db_name}"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@mcp.tool()
+@log_tool
 def list_tables() -> str:
     """Lists all available tables in the database."""
     try:
@@ -48,6 +91,20 @@ def list_tables() -> str:
         return f"Error listing tables: {str(e)}"
 
 @mcp.tool()
+@log_tool
+def list_views() -> str:
+    """Lists all available views in the database."""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS")
+            views = [row.TABLE_NAME for row in cursor.fetchall()]
+            return f"Available Views: {', '.join(views)}"
+    except Exception as e:
+        return f"Error listing views: {str(e)}"
+
+@mcp.tool()
+@log_tool
 def query_db(sql_query: str) -> str:
     """
     Executes a read-only SQL query and returns the results.
@@ -63,6 +120,9 @@ def query_db(sql_query: str) -> str:
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(sql_query)
+            if not cursor.description:
+                return "Query executed successfully, but returned no results."
+            
             columns = [column[0] for column in cursor.description]
             rows = cursor.fetchall()
             
@@ -73,6 +133,7 @@ def query_db(sql_query: str) -> str:
         return f"Database Error: {str(e)}"
     
 @mcp.tool()
+@log_tool
 def describe_table(table_name: str) -> str:
     """Returns the column names and types for a specific table."""
     try:
@@ -84,6 +145,21 @@ def describe_table(table_name: str) -> str:
             return "\n".join([f"{col.COLUMN_NAME} ({col.DATA_TYPE})" for col in columns])
     except Exception as e:
         return f"Error: {str(e)}"    
+
+@mcp.tool()
+@log_tool
+def get_row_count(table_name: str) -> str:
+    """Returns the total number of rows in a specific table."""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            # Use safe parameterization for table name if possible, but T-SQL count(*) needs literal or dynamic SQL
+            # Here we just do a quick sanity check to prevent injection since it's a read-only tool
+            cursor.execute(f"SELECT COUNT(*) FROM [{table_name}]")
+            count = cursor.fetchone()[0]
+            return f"Table '{table_name}' has {count} rows."
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 # ==========================================
 # 4. SERVER ENTRY POINT

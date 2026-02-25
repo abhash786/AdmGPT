@@ -70,6 +70,11 @@ class MCPClientManager:
         if env_vars:
             env.update(env_vars)
             
+        # ENSURE ISOLATION: Remove internal app connection string from tool environment
+        # to prevent tools from accidentally using the app's database if they misbehave
+        if "APP_DB_CONNECTION_STRING" in env:
+            del env["APP_DB_CONNECTION_STRING"]
+            
         server_params = StdioServerParameters(
             command=command,
             args=args,
